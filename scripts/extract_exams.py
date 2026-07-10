@@ -5,7 +5,7 @@
 import re, html, json, glob, os
 
 SRC_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-OUT = os.path.join(SRC_DIR, "app", "exams.json")
+OUT = os.path.join(SRC_DIR, "docs", "exams.json")
 
 # トピック分類キーワード（頻出テーマ）
 TOPICS = {
