@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>生理学A 定期試験 対策アプリ</title>
+<style>
+:root{
+  --bg:#f4f6f8; --surface:#ffffff; --surface-2:#eef2f5; --border:#dde3e8;
+  --text:#1b2733; --muted:#5b6b7a; --primary:#0d7d7a; --primary-weak:#e0f2f1;
+  --accent:#c2410c; --good:#1a7a4c; --warn:#b45309; --shadow:0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.05);
+  --radius:14px;
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#0f1519;--surface:#182027;--surface-2:#1f2a33;--border:#2c3944;
+  --text:#e6edf3;--muted:#9fb0bd;--primary:#3fb8b3;--primary-weak:#123b3a;
+  --accent:#f97316;--good:#4ade80;--warn:#fbbf24;--shadow:0 1px 3px rgba(0,0,0,.4);}
+}
+:root[data-theme="dark"]{--bg:#0f1519;--surface:#182027;--surface-2:#1f2a33;--border:#2c3944;
+  --text:#e6edf3;--muted:#9fb0bd;--primary:#3fb8b3;--primary-weak:#123b3a;
+  --accent:#f97316;--good:#4ade80;--warn:#fbbf24;--shadow:0 1px 3px rgba(0,0,0,.4);}
+:root[data-theme="light"]{--bg:#f4f6f8;--surface:#ffffff;--surface-2:#eef2f5;--border:#dde3e8;
+  --text:#1b2733;--muted:#5b6b7a;--primary:#0d7d7a;--primary-weak:#e0f2f1;
+  --accent:#c2410c;--good:#1a7a4c;--warn:#b45309;--shadow:0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.05);}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",Meiryo,sans-serif;
+  line-height:1.7;font-size:15px;-webkit-font-smoothing:antialiased;}
+a{color:var(--primary)}
+header.topbar{position:sticky;top:0;z-index:50;background:var(--surface);
+  border-bottom:1px solid var(--border);box-shadow:var(--shadow)}
+.topbar-inner{max-width:960px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:12px}
+.brand{font-weight:800;font-size:16px;letter-spacing:.02em;display:flex;align-items:center;gap:8px}
+.brand .dot{width:11px;height:11px;border-radius:50%;background:var(--primary);box-shadow:0 0 0 4px var(--primary-weak)}
+.brand small{font-weight:600;color:var(--muted);font-size:11px}
+.spacer{flex:1}
+.icon-btn{background:var(--surface-2);border:1px solid var(--border);color:var(--text);
+  border-radius:9px;padding:7px 10px;cursor:pointer;font-size:14px;line-height:1}
+.icon-btn:hover{border-color:var(--primary)}
+nav.tabs{max-width:960px;margin:0 auto;padding:0 8px;display:flex;gap:2px;overflow-x:auto}
+nav.tabs button{flex:0 0 auto;background:none;border:none;color:var(--muted);font-weight:600;
+  padding:11px 14px;cursor:pointer;font-size:14px;border-bottom:2.5px solid transparent;white-space:nowrap}
+nav.tabs button.active{color:var(--primary);border-bottom-color:var(--primary)}
+nav.tabs button:hover{color:var(--text)}
+main{max-width:960px;margin:0 auto;padding:20px 16px 80px}
+h2.view-title{font-size:20px;margin:4px 0 4px;font-weight:800}
+.sub{color:var(--muted);font-size:13px;margin:0 0 18px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  box-shadow:var(--shadow);padding:16px 18px;margin-bottom:14px}
+.grid{display:grid;gap:14px}
+.grid.stats{grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
+.stat .n{font-size:30px;font-weight:800;color:var(--primary);line-height:1.1}
+.stat .l{color:var(--muted);font-size:12.5px;margin-top:2px}
+.chip{display:inline-block;background:var(--primary-weak);color:var(--primary);
+  border-radius:999px;padding:2px 10px;font-size:11.5px;font-weight:700;margin:2px 4px 2px 0;white-space:nowrap}
+.chip.grey{background:var(--surface-2);color:var(--muted)}
+.chip.click{cursor:pointer;border:1px solid transparent}
+.chip.click:hover{border-color:var(--primary)}
+.bar-row{display:grid;grid-template-columns:150px 1fr 40px;align-items:center;gap:10px;margin:7px 0;cursor:pointer}
+.bar-row .lbl{font-size:12.5px;color:var(--text);text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar-track{background:var(--surface-2);border-radius:6px;height:20px;overflow:hidden}
+.bar-fill{background:linear-gradient(90deg,var(--primary),var(--primary));height:100%;border-radius:6px;min-width:2px;transition:width .5s}
+.bar-row .val{font-size:12px;color:var(--muted);font-weight:700}
+.bar-row:hover .lbl{color:var(--primary)}
+select,input[type=text]{background:var(--surface);color:var(--text);border:1px solid var(--border);
+  border-radius:9px;padding:9px 11px;font-size:14px;font-family:inherit;width:100%}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.q-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  box-shadow:var(--shadow);margin-bottom:14px;overflow:hidden}
+.q-head{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--surface-2);
+  cursor:pointer;flex-wrap:wrap}
+.q-num{font-weight:800;color:var(--primary);font-size:14px;background:var(--surface);
+  border:1px solid var(--border);border-radius:8px;padding:2px 9px;white-space:nowrap}
+.q-head .yr{font-weight:700;font-size:13px;color:var(--muted)}
+.q-head .topics{flex:1;min-width:120px;text-align:right}
+.status-dot{width:10px;height:10px;border-radius:50%;background:var(--border);flex:0 0 auto}
+.status-dot.s1{background:var(--warn)} .status-dot.s2{background:var(--good)}
+.q-body{padding:14px 18px 18px;display:none}
+.q-body.open{display:block}
+.q-body p.seg{margin:.35em 0}
+.q-body img{max-width:100%;height:auto;border:1px solid var(--border);border-radius:8px;margin:8px 0;background:#fff}
+.q-tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;align-items:center}
+.btn{background:var(--surface-2);border:1px solid var(--border);color:var(--text);border-radius:8px;
+  padding:6px 12px;font-size:13px;cursor:pointer;font-weight:600}
+.btn:hover{border-color:var(--primary)}
+.btn.on-warn{background:var(--warn);color:#fff;border-color:var(--warn)}
+.btn.on-good{background:var(--good);color:#fff;border-color:var(--good)}
+.btn.primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+textarea{width:100%;min-height:70px;background:var(--surface);color:var(--text);border:1px solid var(--border);
+  border-radius:9px;padding:10px;font-size:14px;font-family:inherit;margin-top:8px;resize:vertical}
+.hl{background:#fde68a;color:#111;border-radius:3px;padding:0 2px}
+.empty{color:var(--muted);text-align:center;padding:40px 0}
+/* flashcard */
+.flip{perspective:1200px;margin:0 auto;max-width:560px}
+.flip-inner{position:relative;min-height:220px;transition:transform .5s;transform-style:preserve-3d;cursor:pointer}
+.flip.flipped .flip-inner{transform:rotateY(180deg)}
+.flip-face{position:absolute;inset:0;backface-visibility:hidden;background:var(--surface);
+  border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);
+  padding:24px;display:flex;flex-direction:column;justify-content:center}
+.flip-face.back{transform:rotateY(180deg);background:var(--primary-weak)}
+.flip-face .tag{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.flip-face .txt{font-size:16px;margin-top:10px}
+.flip-face.front .txt{font-weight:700;font-size:18px}
+.hint{text-align:center;color:var(--muted);font-size:12px;margin-top:10px}
+.deck-ctrl{display:flex;justify-content:center;align-items:center;gap:12px;margin-top:18px}
+.progress-line{height:6px;background:var(--surface-2);border-radius:999px;overflow:hidden;margin:14px 0}
+.progress-line>i{display:block;height:100%;background:var(--primary)}
+.small{font-size:12.5px;color:var(--muted)}
+.pill-toggle{display:flex;gap:6px;flex-wrap:wrap}
+.tag-line{margin:6px 0 2px}
+kbd{background:var(--surface-2);border:1px solid var(--border);border-bottom-width:2px;border-radius:5px;padding:1px 6px;font-size:12px}
+.notice{background:var(--primary-weak);border:1px solid var(--primary);border-radius:10px;padding:10px 14px;font-size:13px;margin-bottom:16px}
+footer{max-width:960px;margin:0 auto;padding:20px 16px 40px;color:var(--muted);font-size:12px;border-top:1px solid var(--border)}
+@media(max-width:520px){
+  .bar-row{grid-template-columns:110px 1fr 34px}
+  .stat .n{font-size:24px}
+}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand"><span class="dot"></span><div>生理学A 対策<br><small>定期試験 過去問アプリ</small></div></div>
+    <div class="spacer"></div>
+    <button class="icon-btn" id="themeBtn" title="テーマ切替">◐</button>
+  </div>
+  <nav class="tabs" id="tabs"></nav>
+</header>
+<main id="app"></main>
+<footer>
+  過去問17年分（2008–2025）を教材化した学習用アプリ。進捗・メモはこのブラウザ内（localStorage）に保存されます。<br>
+  ※一問一答の解答は標準的な生理学に基づく学習用の参考解答です。講義ノートの記述を必ず確認してください。
+</footer>
+
+<script src="data.js"></script>
+<script>
+const EX = window.EXAM_DATA, CARDS = window.CARD_DATA.cards;
+const TOPICS = EX.topics;
+const store = {
+  get(k,d){try{return JSON.parse(localStorage.getItem('phys_'+k))??d}catch(e){return d}},
+  set(k,v){localStorage.setItem('phys_'+k,JSON.stringify(v))}
+};
+// flatten all questions
+const ALLQ=[];
+EX.exams.forEach(e=>e.questions.forEach(q=>{
+  ALLQ.push({year:e.year,num:q.num,segments:q.segments,topics:q.topics||['その他'],
+    id:e.year+'-'+q.num,
+    text:q.segments.filter(s=>s.t==='text').map(s=>s.v).join(' ')});
+}));
+const TOTAL=ALLQ.length;
+
+// ---- theme ----
+const themeBtn=document.getElementById('themeBtn');
+function applyTheme(t){if(t)document.documentElement.setAttribute('data-theme',t);}
+applyTheme(store.get('theme',null));
+themeBtn.onclick=()=>{
+  const cur=document.documentElement.getAttribute('data-theme');
+  const dark=cur? cur==='dark' : matchMedia('(prefers-color-scheme:dark)').matches;
+  const next=dark?'light':'dark';applyTheme(next);store.set('theme',next);
+};
+
+// ---- progress helpers ----
+function getStatus(id){return store.get('st_'+id,0)}
+function setStatus(id,v){store.set('st_'+id,v)}
+function getMemo(id){return store.get('memo_'+id,'')}
+function esc(s){return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+
+// topic frequency (count questions per topic)
+function topicCounts(){
+  const c={};TOPICS.forEach(t=>c[t]=0);c['その他']=0;
+  ALLQ.forEach(q=>q.topics.forEach(t=>{c[t]=(c[t]||0)+1}));
+  return Object.entries(c).filter(([,n])=>n>0).sort((a,b)=>b[1]-a[1]);
+}
+
+// ---- router ----
+const VIEWS=[
+  ['dashboard','📊 ダッシュボード'],
+  ['year','📅 年度別'],
+  ['topic','🏷 テーマ別'],
+  ['cards','🃏 一問一答'],
+  ['exam','📝 模擬試験'],
+  ['search','🔍 検索'],
+];
+const tabsEl=document.getElementById('tabs');
+tabsEl.innerHTML=VIEWS.map(([k,l])=>`<button data-v="${k}">${l}</button>`).join('');
+tabsEl.onclick=e=>{const b=e.target.closest('button');if(b)location.hash=b.dataset.v;};
+window.addEventListener('hashchange',route);
+function route(){
+  const v=(location.hash.replace('#','').split('/')[0])||'dashboard';
+  [...tabsEl.children].forEach(b=>b.classList.toggle('active',b.dataset.v===v));
+  const fn=({dashboard:renderDash,year:renderYear,topic:renderTopic,cards:renderCards,exam:renderExam,search:renderSearch})[v]||renderDash;
+  fn();window.scrollTo(0,0);
+}
+const app=document.getElementById('app');
+
+// ---- question renderer ----
+function segHTML(seg,hlq){
+  return seg.map(s=>{
+    if(s.t==='img')return `<img src="${s.v}" alt="図" loading="lazy">`;
+    let t=esc(s.v);
+    if(hlq)hlq.forEach(w=>{if(w)t=t.replace(new RegExp('('+w.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<span class="hl">$1</span>')});
+    return `<p class="seg">${t}</p>`;
+  }).join('');
+}
+function qCardHTML(q,hlq){
+  const st=getStatus(q.id);
+  const memo=getMemo(q.id);
+  const topics=q.topics.map(t=>`<span class="chip">${t}</span>`).join('');
+  return `<div class="q-card" data-id="${q.id}">
+    <div class="q-head" onclick="toggleQ(this)">
+      <span class="status-dot s${st}"></span>
+      <span class="q-num">問${q.num}</span>
+      <span class="yr">${q.year}年度</span>
+      <span class="topics">${topics}</span>
+    </div>
+    <div class="q-body">
+      ${segHTML(q.segments,hlq)}
+      <div class="q-tools">
+        <button class="btn ${st===1?'on-warn':''}" onclick="mark('${q.id}',1,this)">🔁 復習中</button>
+        <button class="btn ${st===2?'on-good':''}" onclick="mark('${q.id}',2,this)">✓ 理解した</button>
+        <button class="btn" onclick="mark('${q.id}',0,this)">リセット</button>
+      </div>
+      <textarea placeholder="自分の解答・メモを書く（自動保存）" oninput="saveMemo('${q.id}',this.value)">${esc(memo)}</textarea>
+    </div>
+  </div>`;
+}
+window.toggleQ=el=>el.parentElement.querySelector('.q-body').classList.toggle('open');
+window.mark=(id,v,btn)=>{
+  const cur=getStatus(id);const nv=cur===v?0:v;setStatus(id,nv);
+  const card=btn.closest('.q-card');
+  card.querySelector('.status-dot').className='status-dot s'+nv;
+  const tools=btn.parentElement;
+  tools.children[0].classList.toggle('on-warn',nv===1);
+  tools.children[1].classList.toggle('on-good',nv===2);
+};
+window.saveMemo=(id,v)=>store.set('memo_'+id,v);
+
+// ---- dashboard ----
+function renderDash(){
+  const done=ALLQ.filter(q=>getStatus(q.id)===2).length;
+  const rev=ALLQ.filter(q=>getStatus(q.id)===1).length;
+  const tc=topicCounts();const max=tc[0][1];
+  app.innerHTML=`
+  <h2 class="view-title">ダッシュボード</h2>
+  <p class="sub">早稲田大学 生理学A（旧 生理学I）定期試験 過去問を教材化。頻出テーマを押さえて効率的に対策しましょう。</p>
+  <div class="grid stats">
+    <div class="card stat"><div class="n">${EX.exams.length}</div><div class="l">収録年度 (2008–2025)</div></div>
+    <div class="card stat"><div class="n">${TOTAL}</div><div class="l">総設問数</div></div>
+    <div class="card stat"><div class="n" style="color:var(--good)">${done}</div><div class="l">理解した</div></div>
+    <div class="card stat"><div class="n" style="color:var(--warn)">${rev}</div><div class="l">復習中</div></div>
+  </div>
+  <div class="card">
+    <h3 style="margin:2px 0 4px">🔥 頻出テーマ ランキング</h3>
+    <p class="small" style="margin:0 0 12px">全設問をテーマ分類した出題頻度。上位テーマは毎年のように問われます。クリックでそのテーマの問題へ。</p>
+    ${tc.map(([t,n])=>`<div class="bar-row" onclick="location.hash='topic/'+encodeURIComponent('${t}')">
+      <div class="lbl">${t}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.round(n/max*100)}%"></div></div>
+      <div class="val">${n}</div></div>`).join('')}
+  </div>
+  <div class="card">
+    <h3 style="margin:2px 0 8px">📚 学習の進め方</h3>
+    <ol style="margin:0;padding-left:20px">
+      <li><b>テーマ別</b>で頻出分野を横断的に解く（同じテーマは複数年で繰り返し出題）。</li>
+      <li><b>一問一答</b>で用語・定義を暗記（${CARDS.length}枚のカード）。</li>
+      <li><b>模擬試験</b>でランダム出題に挑戦し、弱点を洗い出す。</li>
+      <li>各問題に自分の解答をメモし「理解した／復習中」で進捗管理。</li>
+    </ol>
+  </div>`;
+}
+
+// ---- year view ----
+function renderYear(){
+  const years=EX.exams.map(e=>e.year);
+  const sel=store.get('lastYear',years[years.length-1]);
+  app.innerHTML=`<h2 class="view-title">年度別</h2>
+    <p class="sub">各年度の全設問。クリックで展開し、解答メモや進捗を記録できます。</p>
+    <div class="row" style="margin-bottom:16px"><select id="yearSel" style="max-width:220px">
+      ${years.map(y=>`<option value="${y}" ${y===sel?'selected':''}>${y}年度</option>`).join('')}
+    </select><span class="small" id="yearInfo"></span></div>
+    <div id="yearList"></div>`;
+  const draw=y=>{
+    store.set('lastYear',y);
+    const ex=EX.exams.find(e=>e.year===y);
+    const qs=ALLQ.filter(q=>q.year===y);
+    document.getElementById('yearInfo').textContent=`全${qs.length}問`;
+    document.getElementById('yearList').innerHTML=qs.map(q=>qCardHTML(q)).join('');
+  };
+  document.getElementById('yearSel').onchange=e=>draw(e.target.value);
+  draw(sel);
+}
+
+// ---- topic view ----
+function renderTopic(){
+  const param=decodeURIComponent(location.hash.split('/')[1]||'');
+  const tc=topicCounts().map(x=>x[0]);
+  const sel=param||store.get('lastTopic',tc[0]);
+  app.innerHTML=`<h2 class="view-title">テーマ別</h2>
+    <p class="sub">同一テーマの問題を全年度から横断表示。頻出分野の「問われ方」の変遷が一目でわかります。</p>
+    <div class="pill-toggle" id="topicPills" style="margin-bottom:16px">
+      ${tc.map(t=>`<span class="chip click ${t===sel?'':'grey'}" data-t="${t}">${t}</span>`).join('')}
+    </div>
+    <div id="topicInfo" class="small" style="margin-bottom:10px"></div>
+    <div id="topicList"></div>`;
+  const draw=t=>{
+    store.set('lastTopic',t);
+    [...document.querySelectorAll('#topicPills .chip')].forEach(c=>c.classList.toggle('grey',c.dataset.t!==t));
+    const qs=ALLQ.filter(q=>q.topics.includes(t)).sort((a,b)=>b.year.localeCompare(a.year));
+    document.getElementById('topicInfo').textContent=`「${t}」の出題：${qs.length}問（新しい年度順）`;
+    document.getElementById('topicList').innerHTML=qs.length?qs.map(q=>qCardHTML(q)).join(''):'<div class="empty">該当する問題がありません</div>';
+  };
+  document.getElementById('topicPills').onclick=e=>{const c=e.target.closest('.chip');if(c)draw(c.dataset.t);};
+  draw(sel);
+}
+
+// ---- flashcards ----
+let deck=[],di=0;
+function renderCards(){
+  const topics=['すべて',...[...new Set(CARDS.map(c=>c.topic))]];
+  const filt=store.get('cardTopic','すべて');
+  app.innerHTML=`<h2 class="view-title">一問一答（フラッシュカード）</h2>
+    <p class="sub">重要用語・定義を暗記。カードをクリック（またはスペースキー）で解答を表示。</p>
+    <div class="row" style="margin-bottom:14px"><select id="cardTopic" style="max-width:260px">
+      ${topics.map(t=>`<option ${t===filt?'selected':''}>${t}</option>`).join('')}
+    </select><label class="small"><input type="checkbox" id="shuf"> シャッフル</label></div>
+    <div id="deckArea"></div>`;
+  const build=()=>{
+    const t=document.getElementById('cardTopic').value;store.set('cardTopic',t);
+    deck=CARDS.filter(c=>t==='すべて'||c.topic===t);
+    if(document.getElementById('shuf').checked)deck=deck.slice().sort(()=>Math.random()-0.5);
+    di=0;drawCard();
+  };
+  document.getElementById('cardTopic').onchange=build;
+  document.getElementById('shuf').onchange=build;
+  build();
+}
+function drawCard(){
+  const area=document.getElementById('deckArea');if(!area)return;
+  if(!deck.length){area.innerHTML='<div class="empty">カードがありません</div>';return;}
+  const c=deck[di];
+  area.innerHTML=`
+   <div class="progress-line"><i style="width:${Math.round((di+1)/deck.length*100)}%"></i></div>
+   <div class="small" style="text-align:center;margin-bottom:8px">${di+1} / ${deck.length}</div>
+   <div class="flip" id="flip" onclick="this.classList.toggle('flipped')">
+     <div class="flip-inner">
+       <div class="flip-face front"><div class="tag">${c.topic}</div><div class="txt">${esc(c.q)}</div>
+         <div class="hint">クリックで解答 ▸</div></div>
+       <div class="flip-face back"><div class="tag">解答</div><div class="txt">${esc(c.a)}</div></div>
+     </div>
+   </div>
+   <div class="deck-ctrl">
+     <button class="btn" onclick="navCard(-1)">◂ 前へ</button>
+     <button class="btn primary" onclick="document.getElementById('flip').classList.toggle('flipped')">めくる</button>
+     <button class="btn" onclick="navCard(1)">次へ ▸</button>
+   </div>
+   <p class="hint"><kbd>←</kbd><kbd>→</kbd> 移動 / <kbd>Space</kbd> めくる</p>`;
+}
+window.navCard=d=>{di=(di+d+deck.length)%deck.length;drawCard();};
+document.addEventListener('keydown',e=>{
+  if(location.hash.replace('#','')!=='cards')return;
+  const f=document.getElementById('flip');if(!f)return;
+  if(e.key==='ArrowRight'){navCard(1);e.preventDefault();}
+  else if(e.key==='ArrowLeft'){navCard(-1);e.preventDefault();}
+  else if(e.key===' '){f.classList.toggle('flipped');e.preventDefault();}
+});
+
+// ---- mock exam ----
+function renderExam(){
+  app.innerHTML=`<h2 class="view-title">模擬試験（ランダム出題）</h2>
+    <p class="sub">頻出テーマから設問をランダムに抽出。本番同様に自力で解答してから展開して確認しましょう。</p>
+    <div class="card">
+      <div class="row">
+        <label class="small">出題数
+          <select id="nQ" style="width:90px;display:inline-block;margin-left:6px">
+            <option>5</option><option selected>8</option><option>12</option><option>15</option>
+          </select></label>
+        <label class="small">テーマ
+          <select id="eTopic" style="width:200px;display:inline-block;margin-left:6px">
+            <option value="">すべて</option>${TOPICS.map(t=>`<option>${t}</option>`).join('')}
+          </select></label>
+        <button class="btn primary" id="genBtn">出題する</button>
+      </div>
+    </div>
+    <div id="examList"></div>`;
+  document.getElementById('genBtn').onclick=()=>{
+    const n=+document.getElementById('nQ').value;
+    const t=document.getElementById('eTopic').value;
+    let pool=t?ALLQ.filter(q=>q.topics.includes(t)):ALLQ.slice();
+    pool=pool.filter(q=>q.text.length>8).sort(()=>Math.random()-0.5).slice(0,n);
+    document.getElementById('examList').innerHTML=
+      `<div class="notice">全${pool.length}問。各カードは自力で解いてから展開してください。</div>`+
+      pool.map((q,i)=>qCardHTML(q)).join('');
+  };
+  document.getElementById('genBtn').click();
+}
+
+// ---- search ----
+function renderSearch(){
+  app.innerHTML=`<h2 class="view-title">検索</h2>
+    <p class="sub">全${TOTAL}問をキーワード検索（例：ADH、活動電位、GFR、インスリン）。</p>
+    <input type="text" id="q" placeholder="キーワードを入力…" autocomplete="off">
+    <div id="sInfo" class="small" style="margin:12px 0"></div>
+    <div id="sList"></div>`;
+  const inp=document.getElementById('q');
+  const run=()=>{
+    const raw=inp.value.trim();
+    if(!raw){document.getElementById('sInfo').textContent='';document.getElementById('sList').innerHTML='';return;}
+    const words=raw.split(/\s+/);
+    const res=ALLQ.filter(q=>words.every(w=>q.text.toLowerCase().includes(w.toLowerCase())));
+    document.getElementById('sInfo').textContent=`${res.length}件ヒット`;
+    document.getElementById('sList').innerHTML=res.length?res.map(q=>qCardHTML(q,words)).join(''):'<div class="empty">見つかりませんでした</div>';
+  };
+  inp.oninput=run;inp.focus();
+}
+
+route();
+</script>
+</body>
+</html>
