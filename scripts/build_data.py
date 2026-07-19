@@ -15,12 +15,21 @@ ap = os.path.join(APP, "answers.json")
 if os.path.exists(ap):
     answers = json.load(open(ap, encoding="utf-8"))
 
-# 各設問に解答(a)・解説(e)を紐づけ
+# 頻出度: 各設問(正規化キー)が何年度に出題されたか
+years_by_ck = {}
+for e in exams["exams"]:
+    for q in e["questions"]:
+        text = " ".join(s["v"] for s in q["segments"] if s["t"] == "text")
+        years_by_ck.setdefault(ck(text), set()).add(e["year"])
+
+# 各設問に解答(a)・解説(e)・頻出度(freq)を紐づけ
 filled = 0
 for e in exams["exams"]:
     for q in e["questions"]:
         text = " ".join(s["v"] for s in q["segments"] if s["t"] == "text")
-        a = answers.get(ck(text))
+        key = ck(text)
+        q["freq"] = len(years_by_ck.get(key, {e["year"]}))
+        a = answers.get(key)
         if a and a.get("a"):
             q["a"] = a["a"]
             q["e"] = a.get("e", "")
