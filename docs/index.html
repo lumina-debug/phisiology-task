@@ -90,6 +90,21 @@ select,input[type=text]{background:var(--surface);color:var(--text);border:1px s
 textarea{width:100%;min-height:70px;background:var(--surface);color:var(--text);border:1px solid var(--border);
   border-radius:9px;padding:10px;font-size:14px;font-family:inherit;margin-top:8px;resize:vertical}
 .hl{background:#fde68a;color:#111;border-radius:3px;padding:0 2px}
+.ans-box{margin-top:12px;border:1px solid var(--primary);border-radius:12px;overflow:hidden}
+.ans-toggle{width:100%;text-align:left;background:var(--primary-weak);color:var(--primary);
+  border:none;padding:10px 14px;font-weight:700;font-size:13.5px;cursor:pointer;display:flex;align-items:center;gap:8px}
+.ans-toggle:hover{filter:brightness(.97)}
+.ans-content{display:none;padding:14px 16px;background:var(--surface)}
+.ans-content.open{display:block}
+.ans-content h4{margin:0 0 6px;font-size:13px;color:var(--primary);letter-spacing:.03em}
+.ans-content .a-body{font-size:14.5px;white-space:pre-wrap}
+.ans-content .e-body{font-size:13.5px;color:var(--muted);white-space:pre-wrap;margin-top:12px;
+  border-top:1px dashed var(--border);padding-top:10px}
+.ans-none{margin-top:12px;padding:10px 14px;border:1px dashed var(--border);border-radius:10px;
+  color:var(--muted);font-size:13px}
+.badge-a{display:inline-block;font-size:10.5px;font-weight:700;color:#fff;background:var(--primary);
+  border-radius:5px;padding:1px 6px;margin-left:4px;vertical-align:middle}
+.selfgrade{display:flex;gap:8px;margin-top:12px}
 .empty{color:var(--muted);text-align:center;padding:40px 0}
 /* flashcard */
 .flip{perspective:1200px;margin:0 auto;max-width:560px}
@@ -130,7 +145,7 @@ footer{max-width:960px;margin:0 auto;padding:20px 16px 40px;color:var(--muted);f
 <main id="app"></main>
 <footer>
   過去問17年分（2008–2025）を教材化した学習用アプリ。進捗・メモはこのブラウザ内（localStorage）に保存されます。<br>
-  ※一問一答の解答は標準的な生理学に基づく学習用の参考解答です。講義ノートの記述を必ず確認してください。
+  ※模範解答・解説・一問一答はClaudeが標準的な生理学に基づいて作成した学習用の参考解答です。採点基準は講義ノートの記述を必ず確認してください。
 </footer>
 
 <script src="data.js"></script>
@@ -145,10 +160,11 @@ const store = {
 const ALLQ=[];
 EX.exams.forEach(e=>e.questions.forEach(q=>{
   ALLQ.push({year:e.year,num:q.num,segments:q.segments,topics:q.topics||['その他'],
-    id:e.year+'-'+q.num,
+    id:e.year+'-'+q.num,a:q.a||'',ex:q.e||'',
     text:q.segments.filter(s=>s.t==='text').map(s=>s.v).join(' ')});
 }));
 const TOTAL=ALLQ.length;
+const ANSWERED=ALLQ.filter(q=>q.a).length;
 
 // ---- theme ----
 const themeBtn=document.getElementById('themeBtn');
@@ -176,6 +192,7 @@ function topicCounts(){
 // ---- router ----
 const VIEWS=[
   ['dashboard','📊 ダッシュボード'],
+  ['practice','✍️ 演習'],
   ['year','📅 年度別'],
   ['topic','🏷 テーマ別'],
   ['cards','🃏 一問一答'],
@@ -189,7 +206,7 @@ window.addEventListener('hashchange',route);
 function route(){
   const v=(location.hash.replace('#','').split('/')[0])||'dashboard';
   [...tabsEl.children].forEach(b=>b.classList.toggle('active',b.dataset.v===v));
-  const fn=({dashboard:renderDash,year:renderYear,topic:renderTopic,cards:renderCards,exam:renderExam,search:renderSearch})[v]||renderDash;
+  const fn=({dashboard:renderDash,practice:renderPractice,year:renderYear,topic:renderTopic,cards:renderCards,exam:renderExam,search:renderSearch})[v]||renderDash;
   fn();window.scrollTo(0,0);
 }
 const app=document.getElementById('app');
@@ -203,6 +220,17 @@ function segHTML(seg,hlq){
     return `<p class="seg">${t}</p>`;
   }).join('');
 }
+function answerHTML(q){
+  if(!q.a)return `<div class="ans-none">この設問の模範解答は準備中です（頻出テーマから順次追加しています）。</div>`;
+  const exp=q.ex?`<div class="e-body"><h4>解説</h4>${esc(q.ex)}</div>`:'';
+  return `<div class="ans-box">
+    <button class="ans-toggle" onclick="this.nextElementSibling.classList.toggle('open')">💡 解答・解説を見る</button>
+    <div class="ans-content">
+      <h4>模範解答</h4><div class="a-body">${esc(q.a)}</div>
+      ${exp}
+    </div>
+  </div>`;
+}
 function qCardHTML(q,hlq){
   const st=getStatus(q.id);
   const memo=getMemo(q.id);
@@ -212,16 +240,18 @@ function qCardHTML(q,hlq){
       <span class="status-dot s${st}"></span>
       <span class="q-num">問${q.num}</span>
       <span class="yr">${q.year}年度</span>
+      ${q.a?'<span class="badge-a">解答あり</span>':''}
       <span class="topics">${topics}</span>
     </div>
     <div class="q-body">
       ${segHTML(q.segments,hlq)}
+      <textarea placeholder="まず自分の解答・メモを書く（自動保存）" oninput="saveMemo('${q.id}',this.value)">${esc(memo)}</textarea>
+      ${answerHTML(q)}
       <div class="q-tools">
         <button class="btn ${st===1?'on-warn':''}" onclick="mark('${q.id}',1,this)">🔁 復習中</button>
         <button class="btn ${st===2?'on-good':''}" onclick="mark('${q.id}',2,this)">✓ 理解した</button>
         <button class="btn" onclick="mark('${q.id}',0,this)">リセット</button>
       </div>
-      <textarea placeholder="自分の解答・メモを書く（自動保存）" oninput="saveMemo('${q.id}',this.value)">${esc(memo)}</textarea>
     </div>
   </div>`;
 }
@@ -245,11 +275,12 @@ function renderDash(){
   <h2 class="view-title">ダッシュボード</h2>
   <p class="sub">早稲田大学 生理学A（旧 生理学I）定期試験 過去問を教材化。頻出テーマを押さえて効率的に対策しましょう。</p>
   <div class="grid stats">
-    <div class="card stat"><div class="n">${EX.exams.length}</div><div class="l">収録年度 (2008–2025)</div></div>
-    <div class="card stat"><div class="n">${TOTAL}</div><div class="l">総設問数</div></div>
-    <div class="card stat"><div class="n" style="color:var(--good)">${done}</div><div class="l">理解した</div></div>
-    <div class="card stat"><div class="n" style="color:var(--warn)">${rev}</div><div class="l">復習中</div></div>
+    <div class="card stat"><div class="n">${TOTAL}</div><div class="l">総設問数 (17年分)</div></div>
+    <div class="card stat"><div class="n" style="color:var(--primary)">${ANSWERED}</div><div class="l">模範解答つき</div></div>
+    <div class="card stat"><div class="n" style="color:var(--good)">${done}</div><div class="l">できた</div></div>
+    <div class="card stat"><div class="n" style="color:var(--warn)">${rev}</div><div class="l">要復習</div></div>
   </div>
+  <div class="notice">✍️ <b>演習</b>タブで1問ずつ「問題→自分で解答→模範解答・解説」の流れで練習できます。解答・解説はテーマ頻度順に順次追加中（現在 ${ANSWERED}/${TOTAL} 問）。</div>
   <div class="card">
     <h3 style="margin:2px 0 4px">🔥 頻出テーマ ランキング</h3>
     <p class="small" style="margin:0 0 12px">全設問をテーマ分類した出題頻度。上位テーマは毎年のように問われます。クリックでそのテーマの問題へ。</p>
@@ -261,10 +292,10 @@ function renderDash(){
   <div class="card">
     <h3 style="margin:2px 0 8px">📚 学習の進め方</h3>
     <ol style="margin:0;padding-left:20px">
-      <li><b>テーマ別</b>で頻出分野を横断的に解く（同じテーマは複数年で繰り返し出題）。</li>
+      <li><b>演習</b>タブで1問ずつ解く→模範解答・解説で答え合わせ（テーマ・年度で絞り込み可）。</li>
+      <li><b>テーマ別</b>で頻出分野を横断的に確認（同じテーマは複数年で繰り返し出題）。</li>
       <li><b>一問一答</b>で用語・定義を暗記（${CARDS.length}枚のカード）。</li>
       <li><b>模擬試験</b>でランダム出題に挑戦し、弱点を洗い出す。</li>
-      <li>各問題に自分の解答をメモし「理解した／復習中」で進捗管理。</li>
     </ol>
   </div>`;
 }
@@ -289,6 +320,76 @@ function renderYear(){
   document.getElementById('yearSel').onchange=e=>draw(e.target.value);
   draw(sel);
 }
+
+// ---- practice mode (one question at a time) ----
+let pList=[],pi=0;
+function renderPractice(){
+  const tc=['すべて',...topicCounts().map(x=>x[0])];
+  const years=['すべて',...EX.exams.map(e=>e.year)];
+  const ft=store.get('pTopic','すべて'), fy=store.get('pYear','すべて');
+  app.innerHTML=`<h2 class="view-title">演習（1問ずつ）</h2>
+    <p class="sub">問題を読み、自分で解答してから「解答・解説を見る」で確認。理解度を記録しながら進めましょう。</p>
+    <div class="card" style="padding:12px 14px">
+      <div class="row">
+        <label class="small">テーマ <select id="pTopic" style="width:190px;display:inline-block;margin-left:4px">
+          ${tc.map(t=>`<option ${t===ft?'selected':''}>${t}</option>`).join('')}</select></label>
+        <label class="small">年度 <select id="pYear" style="width:120px;display:inline-block;margin-left:4px">
+          ${years.map(y=>`<option ${y===fy?'selected':''}>${y}</option>`).join('')}</select></label>
+        <label class="small"><input type="checkbox" id="pAnsOnly"> 解答ありのみ</label>
+        <label class="small"><input type="checkbox" id="pShuf"> シャッフル</label>
+      </div>
+    </div>
+    <div id="pArea"></div>`;
+  const build=()=>{
+    const t=document.getElementById('pTopic').value, y=document.getElementById('pYear').value;
+    const ao=document.getElementById('pAnsOnly').checked;
+    store.set('pTopic',t);store.set('pYear',y);
+    pList=ALLQ.filter(q=>(t==='すべて'||q.topics.includes(t))&&(y==='すべて'||q.year===y)&&(!ao||q.a));
+    if(document.getElementById('pShuf').checked)pList=pList.slice().sort(()=>Math.random()-0.5);
+    else pList=pList.slice().sort((a,b)=>b.year.localeCompare(a.year)||(+a.num)-(+b.num));
+    pi=0;drawPractice();
+  };
+  ['pTopic','pYear','pAnsOnly','pShuf'].forEach(id=>document.getElementById(id).onchange=build);
+  build();
+}
+function drawPractice(){
+  const area=document.getElementById('pArea');if(!area)return;
+  if(!pList.length){area.innerHTML='<div class="empty">条件に合う問題がありません</div>';return;}
+  const q=pList[pi];const st=getStatus(q.id);const memo=getMemo(q.id);
+  area.innerHTML=`
+    <div class="progress-line"><i style="width:${Math.round((pi+1)/pList.length*100)}%"></i></div>
+    <div class="small" style="text-align:center;margin:6px 0 12px">${pi+1} / ${pList.length}</div>
+    <div class="q-card">
+      <div class="q-head" style="cursor:default">
+        <span class="status-dot s${st}"></span>
+        <span class="q-num">問${q.num}</span><span class="yr">${q.year}年度</span>
+        ${q.a?'<span class="badge-a">解答あり</span>':''}
+        <span class="topics">${q.topics.map(t=>`<span class="chip">${t}</span>`).join('')}</span>
+      </div>
+      <div class="q-body open">
+        ${segHTML(q.segments)}
+        <textarea placeholder="まず自分で解答を書いてみる（自動保存）" oninput="saveMemo('${q.id}',this.value)">${esc(memo)}</textarea>
+        ${answerHTML(q)}
+        <div class="selfgrade">
+          <button class="btn ${st===1?'on-warn':''}" onclick="pGrade(1)">🔁 要復習</button>
+          <button class="btn ${st===2?'on-good':''}" onclick="pGrade(2)">✓ できた</button>
+        </div>
+      </div>
+    </div>
+    <div class="deck-ctrl">
+      <button class="btn" onclick="pNav(-1)">◂ 前の問題</button>
+      <button class="btn primary" onclick="pNav(1)">次の問題 ▸</button>
+    </div>
+    <p class="hint"><kbd>←</kbd><kbd>→</kbd> 前後の問題へ移動</p>`;
+}
+window.pNav=d=>{pi=(pi+d+pList.length)%pList.length;drawPractice();window.scrollTo(0,0);};
+window.pGrade=v=>{const q=pList[pi];const cur=getStatus(q.id);setStatus(q.id,cur===v?0:v);drawPractice();};
+document.addEventListener('keydown',e=>{
+  if((location.hash.replace('#','')||'dashboard')!=='practice')return;
+  if(e.target.tagName==='TEXTAREA'||e.target.tagName==='SELECT'||e.target.tagName==='INPUT')return;
+  if(e.key==='ArrowRight'){pNav(1);e.preventDefault();}
+  else if(e.key==='ArrowLeft'){pNav(-1);e.preventDefault();}
+});
 
 // ---- topic view ----
 function renderTopic(){

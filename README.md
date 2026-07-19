@@ -28,6 +28,7 @@ xdg-open docs/index.html      # Linux
 | 画面 | 内容 |
 |------|------|
 | 📊 **ダッシュボード** | 全設問をテーマ分類した**頻出テーマランキング**と学習進捗サマリ。頻出分野が一目でわかります。 |
+| ✍️ **演習** | 1問ずつ「問題→自分で解答→**模範解答・解説**」で練習。テーマ・年度で絞り込み可。解答・解説はClaudeが作成（現在250問中211問。テーマ頻度順に追加中）。 |
 | 📅 **年度別** | 各年度の全設問を表示。問題文・図表（画像）・小問を確認でき、解答メモと「理解した／復習中」の進捗を記録。 |
 | 🏷 **テーマ別** | 同一テーマの問題を全年度から横断表示。頻出分野の「問われ方」の変遷を追えます。 |
 | 🃏 **一問一答** | 頻出テーマに対応した55枚のフラッシュカード。用語・定義の暗記に。キーボード操作対応。 |
@@ -44,7 +45,10 @@ python3 scripts/build_data.py      # exams.json + flashcards.json -> docs/data.j
 ```
 
 - `scripts/extract_exams.py` — 過去問HTMLを問題単位に構造化し、図表（データURI画像）を保持したままJSON化。キーワードによるテーマ自動分類も行う。
-- `docs/flashcards.json` — 一問一答の参考解答（手作業で作成）。
+- `scripts/build_answers_scaffold.py` — 設問を正規化キーで集約し、`docs/answers.json`（解答の器）を生成/更新（既存の解答は保持）。
+- `scripts/author.py` — `docs/answers.json` に模範解答・解説を書き込む（同一設問は他年度にも自動適用）。
+- `docs/answers.json` — 各設問の模範解答・解説（Claude作成）。`build_data.py` が正規化キーで各設問に紐づける。
+- `docs/flashcards.json` — 一問一答の参考解答。
 - `docs/data.js` — `index.html` が `file://` でも読めるよう、上記JSONをJSにまとめたもの。
 
 ## 注意
